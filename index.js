@@ -10,9 +10,22 @@ function Server (opts) {
 }
 
 Server.prototype.test = function (url) {
-    return url === this.prefix || subdir(this.prefix, url);
+    var u = url.split('?')[0];
+    return u === this.prefix || subdir(this.prefix, u);
 };
 
 Server.prototype.handle = function (req, res) {
-    return serveFiles(req, res);
+    var u = req.url.split('?')[0];
+    var parts = u.split('/');
+    
+    if (parts.length === 3 && /\.git$/.test(parts[2])) {
+        res.end('TODO: handle git\n');
+    }
+    else if (parts.length === 3) {
+        var user = parts[1];
+        var repo = parts[2];
+        
+        res.end('TODO: handle repo page\n');
+    }
+    else serveFiles(req, res);
 };
