@@ -1,7 +1,13 @@
 var ecstatic = require('ecstatic');
 var serveFiles = ecstatic(__dirname + '/static');
 var subdir = require('subdir');
+var path = require('path');
+
 var gitHandler = require('./lib/git.js');
+
+var sublevel = require('level-sublevel');
+var levelup = require('levelup');
+var levelQuery = require('level-query');
 
 module.exports = Server;
 
@@ -10,10 +16,23 @@ function Server (opts) {
     this.prefix = opts.prefix || '/';
     
     this.git = gitHandler({
-        repodir: opts.repodir || opts.datadir + '/repo',
-        workdir: opts.workdir || opts.datadir + '/work',
+        repodir: opts.repodir || path.join(opts.datadir, 'repo'),
+        workdir: opts.workdir || path.join(opts.datadir, 'work'),
         delay: 15
     });
+    
+    if (opts.datadir && !opts.db) {
+        opts.db = path.join(opts.datadir, 'db');
+    }
+    if (!opts.db) throw new Error(
+        'Mandatory "db" parameter not specified.\n'
+        + 'Supply a "datadir" or "db" parameter.\n'
+    );
+    
+    this.db = typeof opts.db === 'string'
+        ? sublevel(levelup(opts.db, { encoding: 'json' }))
+        : opts.db
+    ;
 }
 
 Server.prototype.test = function (url) {
