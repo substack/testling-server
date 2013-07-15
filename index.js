@@ -33,6 +33,7 @@ function Server (opts) {
         ? sublevel(levelup(opts.db, { encoding: 'json' }))
         : opts.db
     ;
+    this.query = levelQuery(this.db);
 }
 
 Server.prototype.test = function (url) {
@@ -41,15 +42,24 @@ Server.prototype.test = function (url) {
 };
 
 Server.prototype.handle = function (req, res) {
-    var u = req.url.split('?')[0];
+    var u = path.relative(this.prefix, req.url.split('?')[0]);
     var parts = u.split('/');
     
-    if (parts.length >= 3 && /\.git$/.test(parts[2])) {
+    if (u === 'data.json') {
+        res.setHeader('content-type', 'application/json');
+        
+        var q = this.query(req.url)
+        q.on('error', function (err) {
+            res.statusCode = err.code || 500;
+            res.end(err + '\n') });
+        q.pipe(res);
+    }
+    else if (parts.length >= 2 && /\.git$/.test(parts[1])) {
         this.git(req, res);
     }
-    else if (parts.length === 3) {
-        var user = parts[1];
-        var repo = parts[2];
+    else if (parts.length === 2) {
+        var user = parts[0];
+        var repo = parts[1];
         
         res.end('TODO: handle repo page\n');
     }
