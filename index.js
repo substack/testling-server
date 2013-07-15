@@ -15,7 +15,7 @@ function Server (opts) {
     if (!(this instanceof Server)) return new Server(opts);
     this.prefix = opts.prefix || '/';
     
-    this.git = gitHandler({
+    this.git = gitHandler(this, {
         repodir: opts.repodir || path.join(opts.datadir, 'repo'),
         workdir: opts.workdir || path.join(opts.datadir, 'work'),
         delay: 15
@@ -47,6 +47,7 @@ Server.prototype.handle = function (req, res) {
     
     if (u === 'data.json') {
         res.setHeader('content-type', 'application/json');
+        res.setTimeout(0);
         
         var q = this.query(req.url)
         q.on('error', function (err) {
