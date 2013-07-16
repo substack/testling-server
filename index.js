@@ -2,20 +2,26 @@ var ecstatic = require('ecstatic');
 var serveFiles = ecstatic(__dirname + '/static');
 var subdir = require('subdir');
 var path = require('path');
+var mkdirp = require('mkdirp');
 
 var gitHandler = require('./lib/git.js');
 
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
 var levelQuery = require('level-query');
+var inherits = require('inherits');
+
+var EventEmitter = require('events').EventEmitter;
 
 module.exports = Server;
+inherits(Server, EventEmitter);
 
 function Server (opts) {
-    if (!(this instanceof Server)) return new Server(opts);
-    this.prefix = opts.prefix || '/';
+    var self = this;
+    if (!(self instanceof Server)) return new Server(opts);
+    self.prefix = opts.prefix || '/';
     
-    this.git = gitHandler(this, {
+    self.git = gitHandler(self, {
         repodir: opts.repodir || path.join(opts.datadir, 'repo'),
         workdir: opts.workdir || path.join(opts.datadir, 'work'),
         delay: 15
@@ -29,11 +35,22 @@ function Server (opts) {
         + 'Supply a "datadir" or "db" parameter.\n'
     );
     
-    this.db = typeof opts.db === 'string'
-        ? sublevel(levelup(opts.db, { encoding: 'json' }))
-        : opts.db
-    ;
-    this.query = levelQuery(this.db);
+    self.once('ready', function () {
+        self.db = typeof opts.db === 'string'
+            ? sublevel(levelup(opts.db, { encoding: 'json' }))
+            : opts.db
+        ;
+        self.query = levelQuery(self.db);
+        self.ready = true;
+    });
+    
+    if (typeof opts.db === 'string') {
+        mkdirp(opts.db, function (err) {
+            if (err) return self.emit('error', err);
+            self.emit('ready');
+        });
+    }
+    else self.emit('ready');
 }
 
 Server.prototype.test = function (url) {
@@ -42,21 +59,26 @@ Server.prototype.test = function (url) {
 };
 
 Server.prototype.handle = function (req, res) {
-    var u = path.relative(this.prefix, req.url.split('?')[0]);
+    var self = this;
+    if (!self.ready) {
+        return self.once('ready', self.handle.bind(self, req, res));
+    }
+    
+    var u = path.relative(self.prefix, req.url.split('?')[0]);
     var parts = u.split('/');
     
     if (u === 'data.json') {
         res.setHeader('content-type', 'application/json');
         res.setTimeout(0);
         
-        var q = this.query(req.url)
+        var q = self.query(req.url)
         q.on('error', function (err) {
             res.statusCode = err.code || 500;
             res.end(err + '\n') });
         q.pipe(res);
     }
     else if (parts.length >= 2 && /\.git$/.test(parts[1])) {
-        this.git(req, res);
+        self.git(req, res);
     }
     else if (parts.length === 2) {
         var user = parts[0];
