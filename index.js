@@ -5,6 +5,7 @@ var path = require('path');
 var mkdirp = require('mkdirp');
 
 var gitHandler = require('./lib/git.js');
+var put = require('./lib/put.js');
 
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
@@ -87,4 +88,12 @@ Server.prototype.handle = function (req, res) {
         res.end('TODO: handle repo page\n');
     }
     else serveFiles(req, res);
+};
+
+Server.prototype.put = function (obj, cb) {
+    var self = this;
+    if (!self.ready) {
+        return self.once('ready', self.put.bind(self, obj, cb));
+    }
+    return put(self.db, obj, cb);
 };
