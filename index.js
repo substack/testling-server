@@ -3,6 +3,7 @@ var serveFiles = ecstatic(__dirname + '/static');
 var subdir = require('subdir');
 var path = require('path');
 var mkdirp = require('mkdirp');
+var parseShell = require('shell-quote').parse;
 
 var gitHandler = require('./lib/git.js');
 var put = require('./lib/put.js');
@@ -27,6 +28,8 @@ function Server (opts) {
         workdir: opts.workdir || path.join(opts.datadir, 'work'),
         delay: 15
     });
+    
+    self.command = parseShell(opts.command || 'testling -u');
     
     if (opts.datadir && !opts.db) {
         opts.db = path.join(opts.datadir, 'db');

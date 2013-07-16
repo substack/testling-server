@@ -1,7 +1,8 @@
 var http = require('http');
 var testling = require('./')({
     prefix: '/',
-    datadir: './data'
+    datadir: './data',
+    command: 'testling -u'
 });
 var argv = require('minimist')(process.argv.slice(2));
 
