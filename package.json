@@ -1,0 +1,50 @@
+{
+  "name": "testling-server",
+  "version": "0.0.0",
+  "description": "server to run your browser tests on every commit",
+  "main": "index.js",
+  "dependencies": {
+    "browserify": ">=2.25.0 && <3",
+    "testling": "~1.2.2",
+    "cicada": "~1.1.0",
+    "ecstatic": "~0.4.5",
+    "level-query": "~0.2.0",
+    "level-sublevel": "~4.7.1",
+    "leveldown": "~0.6.2",
+    "levelup": "~0.10.0",
+    "minimist": "~0.0.1",
+    "mkdirp": "~0.3.5",
+    "subdir": "~0.0.3",
+    "through": "~2.3.4",
+    "inherits": "~2.0.0",
+    "json-stable-stringify": "~0.0.0",
+    "normalize-browser-names": "~0.1.4",
+    "time-window-stream": "~0.0.0",
+    "utf8-stream": "~0.0.0"
+  },
+  "devDependencies": {
+    "tap": "~0.4.0"
+  },
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/substack/testling-server.git"
+  },
+  "homepage": "https://github.com/substack/testling-server",
+  "keywords": [
+    "testling",
+    "browser",
+    "test",
+    "ci",
+    "continuous",
+    "integration"
+  ],
+  "author": {
+    "name": "James Halliday",
+    "email": "mail@substack.net",
+    "url": "http://substack.net"
+  },
+  "license": "MIT"
+}
