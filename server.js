@@ -10,4 +10,4 @@ var server = http.createServer(function (req, res) {
     if (testling.test(req.url)) testling.handle(req, res);
     else res.end('not found\n');
 });
-server.listen(argv.port);
+server.listen(argv.port || parseInt(process.env.PORT));
