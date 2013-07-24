@@ -56,7 +56,7 @@ $ curl -sSgN 'http://localhost:4000/data.json?filter=["type","commit"]&map=repo'
 [["substack/node-falafel.git"],
 ["substack/node-falafel.git"],
 ["substack/gamma.git"]]
-``
+```
 
 # already works
 
