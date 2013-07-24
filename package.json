@@ -1,6 +1,6 @@
 {
   "name": "testling-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "run your browser tests on every commit",
   "main": "index.js",
   "bin": {
