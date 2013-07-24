@@ -2,11 +2,13 @@ var ecstatic = require('ecstatic');
 var serveFiles = ecstatic(__dirname + '/static');
 var subdir = require('subdir');
 var path = require('path');
+var qs = require('querystring');
 var mkdirp = require('mkdirp');
 var parseShell = require('shell-quote').parse;
 
 var gitHandler = require('./lib/git.js');
 var put = require('./lib/put.js');
+var projectStatus = require('./lib/status.js');
 
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
@@ -80,6 +82,12 @@ Server.prototype.handle = function (req, res) {
             res.statusCode = err.code || 500;
             res.end(err + '\n') });
         q.pipe(res);
+    }
+    else if (parts[2] === 'status.json') {
+        res.setHeader('content-type', 'application/json');
+        var params = qs.parse(req.url.split('?')[1]);
+        var repo = parts[0] + '/' + parts[1] + '.git';
+        projectStatus(self.query, params.id, repo).pipe(res);
     }
     else if (parts.length >= 2 && /\.git$/.test(parts[1])) {
         self.git(req, res);
