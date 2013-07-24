@@ -15,7 +15,7 @@ var gitHandler = require('./lib/git.js');
 var put = require('./lib/put.js');
 var projectStatus = require('./lib/status.js');
 var repoList = require('./lib/repo_list.js');
-var avatar = require('./lib/avatar.js');
+var avatar = require('github-avatar');
 
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
@@ -54,7 +54,12 @@ function Server (opts) {
             : opts.db
         ;
         self.query = levelQuery(self.db);
-        self.avatar = avatar.bind(null, self.db.sublevel('avatar'));
+        self.avatar = (function () {
+            var db = self.db.sublevel('avatar');
+            return function (user) {
+                return avatar(user, { db: db, size: 64 });
+            };
+        })();
         self.ready = true;
     });
     
