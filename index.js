@@ -2,15 +2,19 @@ var ecstatic = require('ecstatic');
 var serveFiles = ecstatic(__dirname + '/static');
 var subdir = require('subdir');
 var path = require('path');
+var fs = require('fs');
 var qs = require('querystring');
+
 var mkdirp = require('mkdirp');
 var parseShell = require('shell-quote').parse;
 var through = require('through');
 var JSONStream = require('JSONStream');
+var trumpet = require('trumpet');
 
 var gitHandler = require('./lib/git.js');
 var put = require('./lib/put.js');
 var projectStatus = require('./lib/status.js');
+var repoList = require('./lib/repo_list.js');
 
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
@@ -88,17 +92,7 @@ Server.prototype.handle = function (req, res) {
     }
     else if (u === 'repos.json') {
         res.setHeader('content-type', 'application/json');
-        var seen = {};
-        self.query({ sort: [ 'type', 'commit' ], raw: true })
-            .pipe(through(function (row) {
-                var repo = row.value.repo.replace(/\.git$/, '');
-                if (seen[repo]) return;
-                seen[repo] = true;
-                this.queue(repo);
-            }))
-            .pipe(JSONStream.stringify())
-            .pipe(res)
-        ;
+        repoList(self.query).pipe(JSONStream.stringify()).pipe(res);
     }
     else if (parts[2] === 'status.json') {
         res.setHeader('content-type', 'application/json');
@@ -114,6 +108,20 @@ Server.prototype.handle = function (req, res) {
         var repo = parts[1];
         
         res.end('TODO: handle repo page\n');
+    }
+    else if (u === '') {
+        res.setHeader('content-type', 'text/html');
+        var tr = trumpet();
+        repoList(self.query)
+            .pipe(through(function (repo) {
+                this.queue('<div>' + repo + '</div>');
+            }))
+            .pipe(tr.createWriteStream('#repo-list'))
+        ;
+        
+        fs.createReadStream(__dirname + '/static/index.html')
+            .pipe(tr).pipe(res)
+        ;
     }
     else serveFiles(req, res);
 };
