@@ -68,3 +68,5 @@ $ curl -sSgN 'http://localhost:4000/data.json?filter=["type","commit"]&map=repo'
 
 * project pages
 * sync with testling-hosted browsers
+* validation - right now anybody can come along and run arbitrary code
+* virtualization - run tests in an arbitrary sandbox
