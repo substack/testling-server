@@ -1,7 +1,7 @@
 {
   "name": "testling-server",
   "version": "0.0.0",
-  "description": "server to run your browser tests on every commit",
+  "description": "run your browser tests on every commit",
   "main": "index.js",
   "bin": {
     "testling-server": "bin/cmd.js"
