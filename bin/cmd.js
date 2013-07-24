@@ -1,5 +1,7 @@
+#!/usr/bin/env node
+
 var http = require('http');
-var testling = require('./')({
+var testling = require('../')({
     prefix: '/',
     datadir: './data',
     command: 'testling -u'

@@ -80,7 +80,8 @@ Server.prototype.handle = function (req, res) {
         var q = self.query(req.url)
         q.on('error', function (err) {
             res.statusCode = err.code || 500;
-            res.end(err + '\n') });
+            res.end(err + '\n');
+        });
         q.pipe(res);
     }
     else if (parts[2] === 'status.json') {
