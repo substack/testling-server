@@ -5,6 +5,8 @@ var path = require('path');
 var qs = require('querystring');
 var mkdirp = require('mkdirp');
 var parseShell = require('shell-quote').parse;
+var through = require('through');
+var JSONStream = require('JSONStream');
 
 var gitHandler = require('./lib/git.js');
 var put = require('./lib/put.js');
@@ -83,6 +85,20 @@ Server.prototype.handle = function (req, res) {
             res.end(err + '\n');
         });
         q.pipe(res);
+    }
+    else if (u === 'repos.json') {
+        res.setHeader('content-type', 'application/json');
+        var seen = {};
+        self.query({ sort: [ 'type', 'commit' ], raw: true })
+            .pipe(through(function (row) {
+                var repo = row.value.repo.replace(/\.git$/, '');
+                if (seen[repo]) return;
+                seen[repo] = true;
+                this.queue(repo);
+            }))
+            .pipe(JSONStream.stringify())
+            .pipe(res)
+        ;
     }
     else if (parts[2] === 'status.json') {
         res.setHeader('content-type', 'application/json');

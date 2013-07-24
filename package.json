@@ -27,7 +27,8 @@
     "json-stable-stringify": "~0.0.0",
     "normalize-browser-names": "~0.1.4",
     "time-window-stream": "~0.0.0",
-    "utf8-stream": "~0.0.0"
+    "utf8-stream": "~0.0.0",
+    "JSONStream": "~0.6.4"
   },
   "devDependencies": {
     "tap": "~0.4.0"
