@@ -15,6 +15,12 @@ var gitHandler = require('./lib/git.js');
 var put = require('./lib/put.js');
 var projectStatus = require('./lib/status.js');
 var repoList = require('./lib/repo_list.js');
+
+var hyperspace = require('hyperspace');
+var render = {
+    repos: require('./render/repo.js')
+};
+
 var avatar = require('github-avatar');
 
 var sublevel = require('level-sublevel');
@@ -130,8 +136,9 @@ Server.prototype.handle = function (req, res) {
         var tr = trumpet();
         repoList(self.query)
             .pipe(through(function (repo) {
-                this.queue('<div>' + repo + '</div>');
+                this.queue({ user: repo.split('/')[0], repo: repo });
             }))
+            .pipe(render.repos())
             .pipe(tr.createWriteStream('#repo-list'))
         ;
         
