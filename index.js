@@ -91,8 +91,11 @@ Server.prototype.handle = function (req, res) {
         q.pipe(res);
     }
     else if (u === 'repos.json') {
+        var params = qs.parse(req.url.split('?')[1]);
+        if (params.follow) res.setTimeout(0);
+        
         res.setHeader('content-type', 'application/json');
-        repoList(self.query).pipe(JSONStream.stringify()).pipe(res);
+        repoList(self.query, params).pipe(JSONStream.stringify()).pipe(res);
     }
     else if (parts[2] === 'status.json') {
         res.setHeader('content-type', 'application/json');
