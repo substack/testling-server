@@ -15,6 +15,7 @@ var gitHandler = require('./lib/git.js');
 var put = require('./lib/put.js');
 var projectStatus = require('./lib/status.js');
 var repoList = require('./lib/repo_list.js');
+var avatar = require('./lib/avatar.js');
 
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
@@ -53,6 +54,7 @@ function Server (opts) {
             : opts.db
         ;
         self.query = levelQuery(self.db);
+        self.avatar = avatar.bind(null, self.db.sublevel('avatar'));
         self.ready = true;
     });
     
@@ -79,7 +81,13 @@ Server.prototype.handle = function (req, res) {
     var u = path.relative(self.prefix, req.url.split('?')[0]);
     var parts = u.split('/');
     
-    if (u === 'data.json') {
+    if (parts[0] === 'avatar' && /\.jpg$/.test(parts[1])) {
+        var user = parts[1].replace(/\.jpg$/, '');
+        res.setHeader('content-type', 'image/jpeg');
+        res.setHeader('max-age', 3 * 24 * 60 * 60);
+        self.avatar(user).pipe(res);
+    }
+    else if (u === 'data.json') {
         res.setHeader('content-type', 'application/json');
         res.setTimeout(0);
         
