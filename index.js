@@ -125,6 +125,19 @@ Server.prototype.handle = function (req, res) {
     else if (parts.length >= 2 && /\.git$/.test(parts[1])) {
         self.git(req, res);
     }
+    else if (parts.length === 3 && parts[2] === 'data.json') {
+        res.setHeader('content-type', 'application/json');
+        
+        var params = qs.parse(req.url.split('?')[1]);
+        var user = parts[0];
+        var repo = parts[1];
+        params.sort = [ 'repo', user + '/' + repo + '.git' ];
+        params.raw = false;
+        
+        var q = self.query(params);
+        q.on('error', function (err) { res.end(err + '\n') });
+        q.pipe(res);
+    }
     else if (parts.length === 2) {
         var user = parts[0];
         var repo = parts[1];
