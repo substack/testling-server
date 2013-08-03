@@ -128,6 +128,7 @@ Server.prototype.handle = function (req, res) {
     }
     else if (parts.length === 3 && parts[2] === 'data.json') {
         res.setHeader('content-type', 'application/json');
+        res.setTimeout(0);
         
         var params = qs.parse(req.url.split('?')[1]);
         var user = parts[0];
@@ -137,20 +138,21 @@ Server.prototype.handle = function (req, res) {
         params.keys = false;
         
         var join = levelJoin(self.db);
-        join.add('commit', [ 'job' ], [ 'type', 'commit' ]);
+        join.on('error', function (err) { res.end(err + '\n') });
+        
+        join.add('commit',
+            [ 'job' ], [ 'repo', user + '/' + repo + '.git' ]
+        );
+        
         join.add('output', [ 'job' ], [ 'type', 'output' ]);
+        /*
         join.add('metadata', [ 'job' ], [ 'type', 'metadata' ]);
         join.add('visit', [ 'job' ], [ 'type', 'visit' ]);
         join.add('result', [ 'job' ], [ 'type', 'result' ]);
         join.add('exit', [ 'job' ], [ 'type', 'exit' ]);
         join.add('error', [ 'job' ], [ 'type', 'error' ]);
-        join.pipe(JSONStream.stringify()).pipe(res);
-        
-        /*
-        var q = self.query(params);
-        q.on('error', function (err) { res.end(err + '\n') });
-        q.pipe(res);
         */
+        join.pipe(JSONStream.stringify()).pipe(res);
     }
     else if (parts.length === 2) {
         var user = parts[0];
