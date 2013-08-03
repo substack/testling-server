@@ -26,6 +26,7 @@ var avatar = require('github-avatar');
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
 var levelQuery = require('level-query');
+var levelJoin = require('level-join');
 var inherits = require('inherits');
 
 var EventEmitter = require('events').EventEmitter;
@@ -133,10 +134,23 @@ Server.prototype.handle = function (req, res) {
         var repo = parts[1];
         params.sort = [ 'repo', user + '/' + repo + '.git' ];
         params.raw = false;
+        params.keys = false;
         
+        var join = levelJoin(self.db);
+        join.add('commit', [ 'job' ], [ 'type', 'commit' ]);
+        join.add('output', [ 'job' ], [ 'type', 'output' ]);
+        join.add('metadata', [ 'job' ], [ 'type', 'metadata' ]);
+        join.add('visit', [ 'job' ], [ 'type', 'visit' ]);
+        join.add('result', [ 'job' ], [ 'type', 'result' ]);
+        join.add('exit', [ 'job' ], [ 'type', 'exit' ]);
+        join.add('error', [ 'job' ], [ 'type', 'error' ]);
+        join.pipe(JSONStream.stringify()).pipe(res);
+        
+        /*
         var q = self.query(params);
         q.on('error', function (err) { res.end(err + '\n') });
         q.pipe(res);
+        */
     }
     else if (parts.length === 2) {
         var user = parts[0];

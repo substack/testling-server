@@ -33,7 +33,8 @@
     "hyperspace": "~0.1.4",
     "github-avatar": "~0.0.0",
     "shell-quote": "~1.3.3",
-    "concat-stream": "~1.0.0"
+    "concat-stream": "~1.0.0",
+    "level-join": "0.0.0"
   },
   "devDependencies": {
     "tap": "~0.4.0"
