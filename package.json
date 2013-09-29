@@ -36,7 +36,8 @@
     "concat-stream": "~1.0.0",
     "level-join": "0.0.0",
     "foreign-key": "0.0.0",
-    "shasum": "~1.0.0"
+    "shasum": "~1.0.0",
+    "level-assoc": "~0.12.1"
   },
   "devDependencies": {
     "tap": "~0.4.0"

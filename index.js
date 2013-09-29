@@ -27,15 +27,8 @@ var avatar = require('github-avatar');
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
 var levelQuery = require('level-query');
-var foreignKey = require('foreign-key');
 
-var fkrepo = foreignKey([ 'type', 'commit' ]);
-fkrepo.add('metadata', [ 'type', 'metadata' ], 'job');
-fkrepo.add('visit', [ 'type', 'visit' ], 'job');
-fkrepo.add('output', [ 'type', 'output' ], 'job');
-fkrepo.add('result', [ 'type', 'result' ], 'job');
-fkrepo.add('exit', [ 'type', 'exit' ], 'job');
-fkrepo.add('error', [ 'type', 'error' ], 'job');
+var levelAssoc = require('level-assoc');
 
 var inherits = require('inherits');
 var EventEmitter = require('events').EventEmitter;
@@ -69,6 +62,19 @@ function Server (opts) {
             ? sublevel(levelup(opts.db, { encoding: 'json' }))
             : opts.db
         ;
+        
+        self.assoc = levelAssoc(self.db);
+        self.job = self.assoc.add('job');
+        self.job.hasMany('visit', [ 'type', 'visit' ]);
+        self.job.hasMany('commit', [ 'type', 'commit' ]); // hasOne
+        self.job.hasMany('output', [ 'type', 'output' ]);
+        self.job.hasMany('result', [ 'type', 'result' ]);
+        self.job.hasMany('exit', [ 'type', 'exit' ]);
+        self.job.hasMany('error', [ 'type', 'error' ]);
+        
+        self.repo = self.assoc.add('repo');
+        self.repo.hasMany('job', [ 'type', 'job' ]);
+        
         self.query = levelQuery(self.db);
         self.avatar = (function () {
             var db = self.db.sublevel('avatar');
@@ -140,18 +146,15 @@ Server.prototype.handle = function (req, res) {
         res.setTimeout(0);
         
         var params = qs.parse(req.url.split('?')[1]);
-        var user = parts[0];
-        var repo = parts[1];
+        var repo = parts.slice(0, 2).join('/') + '.git';
         
-        var opts = {
-            start: encode([ ]).toString('hex'),
-            end: encode([]).toString('hex')
-        };
-        self.db.createReadStream(opts)
-            .pipe(fkrepo.createStream())
-            .pipe(JSONStream.stringify())
-            .pipe(res)
-        ;
+        var s = self.assoc.get(repo).createStream();
+        s.on('error', function (err) {
+            res.statusCode = err.code || 500;
+            if (err.name === 'NotFoundError') res.statusCode = 404
+            res.end(err + '\n');
+        });
+        s.pipe(res);
     }
     else if (parts.length === 2) {
         var user = parts[0];
@@ -182,5 +185,6 @@ Server.prototype.put = function (obj, cb) {
     if (!self.ready) {
         return self.once('ready', self.put.bind(self, obj, cb));
     }
-    return self.db.put(shasum(obj), obj, cb);
+    var key = (obj && obj.job ? obj.job + '-' : '') + shasum(obj);
+    return self.db.put(key, obj, cb);
 };
