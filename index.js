@@ -10,9 +10,10 @@ var parseShell = require('shell-quote').parse;
 var through = require('through');
 var JSONStream = require('JSONStream');
 var trumpet = require('trumpet');
+var encode = require('bytewise').encode;
+var shasum = require('shasum');
 
 var gitHandler = require('./lib/git.js');
-var put = require('./lib/put.js');
 var projectStatus = require('./lib/status.js');
 var repoList = require('./lib/repo_list.js');
 
@@ -26,9 +27,17 @@ var avatar = require('github-avatar');
 var sublevel = require('level-sublevel');
 var levelup = require('levelup');
 var levelQuery = require('level-query');
-var levelJoin = require('level-join');
-var inherits = require('inherits');
+var foreignKey = require('foreign-key');
 
+var fkrepo = foreignKey([ 'type', 'commit' ]);
+fkrepo.add('metadata', [ 'type', 'metadata' ], 'job');
+fkrepo.add('visit', [ 'type', 'visit' ], 'job');
+fkrepo.add('output', [ 'type', 'output' ], 'job');
+fkrepo.add('result', [ 'type', 'result' ], 'job');
+fkrepo.add('exit', [ 'type', 'exit' ], 'job');
+fkrepo.add('error', [ 'type', 'error' ], 'job');
+
+var inherits = require('inherits');
 var EventEmitter = require('events').EventEmitter;
 
 module.exports = Server;
@@ -133,26 +142,16 @@ Server.prototype.handle = function (req, res) {
         var params = qs.parse(req.url.split('?')[1]);
         var user = parts[0];
         var repo = parts[1];
-        params.sort = [ 'repo', user + '/' + repo + '.git' ];
-        params.raw = false;
-        params.keys = false;
         
-        var join = levelJoin(self.db);
-        join.on('error', function (err) { res.end(err + '\n') });
-        
-        join.add('commit',
-            [ 'job' ], [ 'repo', user + '/' + repo + '.git' ]
-        );
-        
-        join.add('output', [ 'job' ], [ 'type', 'output' ]);
-        /*
-        join.add('metadata', [ 'job' ], [ 'type', 'metadata' ]);
-        join.add('visit', [ 'job' ], [ 'type', 'visit' ]);
-        join.add('result', [ 'job' ], [ 'type', 'result' ]);
-        join.add('exit', [ 'job' ], [ 'type', 'exit' ]);
-        join.add('error', [ 'job' ], [ 'type', 'error' ]);
-        */
-        join.pipe(JSONStream.stringify()).pipe(res);
+        var opts = {
+            start: encode([ ]).toString('hex'),
+            end: encode([]).toString('hex')
+        };
+        self.db.createReadStream(opts)
+            .pipe(fkrepo.createStream())
+            .pipe(JSONStream.stringify())
+            .pipe(res)
+        ;
     }
     else if (parts.length === 2) {
         var user = parts[0];
@@ -183,5 +182,5 @@ Server.prototype.put = function (obj, cb) {
     if (!self.ready) {
         return self.once('ready', self.put.bind(self, obj, cb));
     }
-    return put(self.db, obj, cb);
+    return self.db.put(shasum(obj), obj, cb);
 };
