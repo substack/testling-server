@@ -13,9 +13,9 @@ var trumpet = require('trumpet');
 var encode = require('bytewise').encode;
 var shasum = require('shasum');
 
+var Transform = require('stream').Transform;
+
 var gitHandler = require('./lib/git.js');
-var projectStatus = require('./lib/status.js');
-var repoList = require('./lib/repo_list.js');
 
 var hyperspace = require('hyperspace');
 var render = {
@@ -25,9 +25,7 @@ var render = {
 var avatar = require('github-avatar');
 
 var sublevel = require('level-sublevel');
-var levelup = require('levelup');
-var levelQuery = require('level-query');
-
+var level = require('level');
 var levelAssoc = require('level-assoc');
 
 var inherits = require('inherits');
@@ -59,11 +57,12 @@ function Server (opts) {
     
     self.once('ready', function () {
         self.db = typeof opts.db === 'string'
-            ? sublevel(levelup(opts.db, { encoding: 'json' }))
+            ? sublevel(level(opts.db, { encoding: 'json' }))
             : opts.db
         ;
         
         self.assoc = levelAssoc(self.db);
+        
         self.job = self.assoc.add('job');
         self.job.hasMany('visit', [ 'type', 'visit' ]);
         self.job.hasMany('commit', [ 'type', 'commit' ]); // hasOne
@@ -73,9 +72,8 @@ function Server (opts) {
         self.job.hasMany('error', [ 'type', 'error' ]);
         
         self.repo = self.assoc.add('repo');
-        self.repo.hasMany('job', [ 'type', 'job' ]);
+        self.repo.hasMany('jobs', [ 'type', 'job' ]);
         
-        self.query = levelQuery(self.db);
         self.avatar = (function () {
             var db = self.db.sublevel('avatar');
             return function (user) {
@@ -114,34 +112,10 @@ Server.prototype.handle = function (req, res) {
         res.setHeader('max-age', 3 * 24 * 60 * 60);
         self.avatar(user).pipe(res);
     }
-    else if (u === 'data.json') {
-        res.setHeader('content-type', 'application/json');
-        res.setTimeout(0);
-        
-        var q = self.query(req.url)
-        q.on('error', function (err) {
-            res.statusCode = err.code || 500;
-            res.end(err + '\n');
-        });
-        q.pipe(res);
-    }
-    else if (u === 'repos.json') {
-        var params = qs.parse(req.url.split('?')[1]);
-        if (params.follow) res.setTimeout(0);
-        
-        res.setHeader('content-type', 'application/json');
-        repoList(self.query, params).pipe(JSONStream.stringify()).pipe(res);
-    }
-    else if (parts[2] === 'status.json') {
-        res.setHeader('content-type', 'application/json');
-        var params = qs.parse(req.url.split('?')[1]);
-        var repo = parts[0] + '/' + parts[1] + '.git';
-        projectStatus(self.query, params.id, repo).pipe(res);
-    }
     else if (parts.length >= 2 && /\.git$/.test(parts[1])) {
         self.git(req, res);
     }
-    else if (parts.length === 3 && parts[2] === 'data.json') {
+    else if (parts.length === 3 && parts[2] === 'jobs.json') {
         res.setHeader('content-type', 'application/json');
         res.setTimeout(0);
         
@@ -151,10 +125,40 @@ Server.prototype.handle = function (req, res) {
         var s = self.assoc.get(repo).createStream();
         s.on('error', function (err) {
             res.statusCode = err.code || 500;
-            if (err.name === 'NotFoundError') res.statusCode = 404
+            if (err.name === 'NotFoundError') res.statusCode = 404;
             res.end(err + '\n');
         });
         s.pipe(res);
+    }
+    else if (parts.length === 3 && parts[2] === 'data.json') {
+        res.setHeader('content-type', 'application/json');
+        res.setTimeout(0);
+        
+        var params = qs.parse(req.url.split('?')[1]);
+        var repo = parts.slice(0, 2).join('/') + '.git';
+        
+        self.assoc.get(repo, function (err, r) {
+            if (err) {
+                res.statusCode = err.code || 500;
+                if (err.name === 'NotFoundError') res.statusCode = 404;
+                return res.end(err + '\n');
+            }
+            
+            var tf = new Transform({ objectMode: true });
+            tf._transform = function (row, enc, next) {
+                var cs = self.assoc.get(row.key).createStream();
+                tf.push(JSON.stringify(row) + '\n');
+                cs.pipe(res, { end: false });
+                cs.on('data', function (buf) { tf.push(buf) });
+                cs.on('end', next);
+            };
+            
+            tf._flush = function () {
+                res.end();
+            };
+            
+            r.jobs().pipe(tf).pipe(res);
+        });
     }
     else if (parts.length === 2) {
         var user = parts[0];
@@ -165,9 +169,13 @@ Server.prototype.handle = function (req, res) {
     else if (u === '') {
         res.setHeader('content-type', 'text/html');
         var tr = trumpet();
-        repoList(self.query)
-            .pipe(through(function (repo) {
-                this.queue({ user: repo.split('/')[0], repo: repo });
+        self.assoc.list('repo')
+            .pipe(through(function (row) {
+                this.queue({
+                    user: row.key.split('/')[0],
+                    repo: row.key.split('/')[1],
+                    jobs: row.value.jobs
+                });
             }))
             .pipe(render.repos())
             .pipe(tr.createWriteStream('#repo-list'))
