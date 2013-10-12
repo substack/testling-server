@@ -36,13 +36,13 @@ body {
 }
 
 #repos {
-  background-color: rgb(230,220,245);
+  background-color: rgb(252,245,255);
   min-height: 400px;
-  padding: 2px;
 }
 
 .repo {
   background-color: rgb(250,240,255);
+  margin-bottom: 4px;
 }
 
 .repo.dark {
@@ -63,8 +63,13 @@ body {
   margin-left: 10px;
 }
 
+.repo .job {
+  
+}
+
 #browsers {
   text-align: right;
+  margin-right: 10px;
 }
 
 #browsers img {
