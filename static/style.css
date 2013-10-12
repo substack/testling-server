@@ -1,5 +1,43 @@
+body {
+  font-family: helvetica, ubuntu, sans-serif;
+}
+
+#header {
+  margin-bottom: -40px;
+}
+
+#header h1 {
+  display: inline-block;
+  margin-right: 20px;
+  vertical-align: top;
+  color: rgb(110,80,80);
+}
+
+#header .logo {
+  margin-left: 15px;
+  margin-bottom: -20px;
+  margin-top: 5px;
+}
+
+#header #add-repo {
+  vertical-align: top;
+  margin-top: 20px;
+  cursor: pointer;
+  background-color: rgb(120,180,30);
+  border-radius: 5px;
+  border-width: 0px;
+  padding: 15px;
+  color: white;
+}
+
+#header #add-repo:hover {
+  background-color: rgb(180,230,30);
+  color: rgb(120,180,30);
+}
+
 #repos {
-  background-color: rgb(192,127,127);
+  background-color: rgb(230,225,245);
+  min-height: 400px;
 }
 
 .repo .gravatar {
