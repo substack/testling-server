@@ -2,6 +2,20 @@
   background-color: rgb(192,127,127);
 }
 
+.repo .gravatar {
+  display: inline-block;
+  margin-left: 4px;
+  margin-top: 4px;
+}
+
+.repo .info {
+  display: inline-block;
+  width: 400px;
+  vertical-align: top;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
 #browsers {
   text-align: right;
 }

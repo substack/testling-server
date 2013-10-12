@@ -6,8 +6,11 @@ var job = require('./job.js');
 module.exports = function () {
     return hyperspace(html, function (row) {
         return {
-            '.name': row.repo,
-            '.gravatar': { href: 'https://github.com/' + row.repo },
+            '.name': {
+                href: '/' + row.repo,
+                _text: row.repo
+            },
+            '.gravatar': { href: '/~' + row.repo.split('/')[0] },
             '.gravatar img': { src: '/avatar/' + row.user + '.jpg' },
             '.jobs': row.jobs().pipe(job())
         };

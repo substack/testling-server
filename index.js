@@ -184,7 +184,7 @@ Server.prototype.handle = function (req, res) {
             .pipe(through(function (row) {
                 this.queue({
                     user: row.key.split('/')[0],
-                    repo: row.key.split('/')[1],
+                    repo: row.key.replace(/\.git$/, ''),
                     jobs: row.value.jobs
                 });
             }))
