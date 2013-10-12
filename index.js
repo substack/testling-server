@@ -23,6 +23,7 @@ var render = {
 };
 
 var avatar = require('github-avatar');
+var browsers = require('./available.json');
 
 var sublevel = require('level-sublevel');
 var level = require('level');
@@ -105,6 +106,10 @@ Server.prototype.handle = function (req, res) {
     
     var u = path.relative(self.prefix, req.url.split('?')[0]);
     var parts = u.split('/');
+    if (parts[0] === '_') {
+        req.url = '/' + parts.slice(1).join('/');
+        return serveFiles(req, res);
+    }
     
     if (parts[0] === 'avatar' && /\.jpg$/.test(parts[1])) {
         var user = parts[1].replace(/\.jpg$/, '');
@@ -169,6 +174,12 @@ Server.prototype.handle = function (req, res) {
     else if (u === '') {
         res.setHeader('content-type', 'text/html');
         var tr = trumpet();
+        tr.select('#browsers').createWriteStream().end(
+            Object.keys(browsers).map(function (name) {
+                return '<img src="/_/images/' + name + '.png">';
+            }).join('\n')
+        );
+        
         self.assoc.list('repo')
             .pipe(through(function (row) {
                 this.queue({
@@ -178,7 +189,7 @@ Server.prototype.handle = function (req, res) {
                 });
             }))
             .pipe(render.repos())
-            .pipe(tr.createWriteStream('#repo-list'))
+            .pipe(tr.createWriteStream('#repos'))
         ;
         
         fs.createReadStream(__dirname + '/static/index.html')

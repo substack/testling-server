@@ -1,0 +1,12 @@
+#repos {
+  background-color: rgb(192,127,127);
+}
+
+#browsers {
+  text-align: right;
+}
+
+#browsers img {
+  width: 40px;
+  margin-left: 5px;
+}
