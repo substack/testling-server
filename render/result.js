@@ -11,7 +11,10 @@ module.exports = function () {
             '.version': Object.keys(row.value).sort(cmp).map(function (v) {
                 return {
                     _text: v,
-                    'class': row.value[v] ? 'version ok' : 'version fail'
+                    'class': 'version ' + ({
+                        true: 'ok',
+                        false: 'fail'
+                    } || 'pending')
                 };
             })
         };
