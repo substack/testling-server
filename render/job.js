@@ -5,6 +5,7 @@ var result = require('./result.js');
 
 module.exports = function (repo) {
     return hyperspace(html, function (row) {
+        var meta = row.value.meta;
         return {
             '.name': {
                 href: '/' + repo,
@@ -12,7 +13,7 @@ module.exports = function (repo) {
             },
             '.hash': row.key.split('.')[0],
             '.time': new Date(row.value.time),
-            '.results': row.value.result().pipe(result())
+            '.results': row.value.result().pipe(result(meta))
         };
     });
 };

@@ -4,18 +4,24 @@ var html = fs.readFileSync(__dirname + '/result.html', 'utf8');
 var through = require('through');
 var combine = require('stream-combiner');
 var available = require('../available.json');
+var normalize = require('normalize-browser-names');
 
-module.exports = function () {
-    var browsers = {};
+module.exports = function (meta) {
+    var mbrowsers = normalize(meta.browsers);
+    var browsers = Object.keys(mbrowsers).reduce(function (acc, key) {
+        acc[key] = mbrowsers[key].reduce(function (acc_, k) {
+            acc_[k] = 'pending';
+            return acc_;
+        }, {});
+        return acc;
+    }, {});
+    
     var hs = hyperspace(html, function (row) {
         return {
             '.version': Object.keys(row.value).sort(cmp).map(function (v) {
                 return {
                     _text: v,
-                    'class': 'version ' + ({
-                        true: 'ok',
-                        false: 'fail'
-                    } || 'pending')
+                    'class': 'version ' + row.value[v]
                 };
             })
         };
@@ -32,7 +38,7 @@ module.exports = function () {
         var name = row.value.browser[0];
         var version = row.value.browser[1];
         if (!browsers[name]) browsers[name] = {};
-        browsers[name][version] = row.value.ok;
+        browsers[name][version] = row.value.ok ? 'ok' : 'fail';
     }
     
     function end () {

@@ -97,9 +97,13 @@ body {
   margin-right: 5px;
   display: inline-block;
   vertical-align: top;
-  background-color: rgb(255,50,50);
   text-align: center;
   min-height: 5px;
+}
+
+.results .version {
+  background-color: rgb(100,100,100);
+  margin-bottom: 2px;
 }
 
 .results .version.ok {
@@ -108,10 +112,6 @@ body {
 
 .results .version.fail {
   background-color: rgb(255,50,50);
-}
-
-.results .version.pending {
-  background-color: rgb(100,100,100);
 }
 
 #browsers {
