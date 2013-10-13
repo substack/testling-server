@@ -53,12 +53,11 @@ body {
   margin-bottom: 4px;
   background-color: rgb(220,200,235);
   color: rgb(50,40,120);
-  border-bottom-left-radius: 5px;
-  border-top-right-radius: 5px;
+  border-radius: 5px;
 }
 
 .repo.dark {
-  background-color: rgb(200,200,250);
+  background-color: rgb(190,140,200);
   color: rgb(40,40,140);
 }
 
@@ -104,10 +103,13 @@ body {
 .results .version {
   background-color: rgb(100,100,100);
   margin-bottom: 2px;
+  font-size: 0.8em;
+  color: rgb(180,180,180);
 }
 
 .results .version.ok {
-  background-color: rgb(50,255,50);
+  background-color: rgb(140,205,120);
+  color: rgb(25,80,25);
 }
 
 .results .version.fail {
