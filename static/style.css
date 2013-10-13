@@ -24,20 +24,21 @@ body {
   margin-top: 5px;
 }
 
-#header #add-repo {
+#header button {
   vertical-align: top;
   margin-top: 20px;
   cursor: pointer;
-  background-color: rgb(120,180,30);
-  border-radius: 5px;
+  background-color: rgb(10,140,220);
+  border-radius: 8px;
   border-width: 0px;
   padding: 15px;
   color: white;
+  width: 140px;
+  margin-right: 5px;
 }
 
-#header #add-repo:hover {
-  background-color: rgb(180,230,30);
-  color: rgb(120,180,30);
+#header button:hover {
+  background-color: rgb(40,160,240);
 }
 
 #repos {
@@ -49,17 +50,21 @@ body {
 
 .repo {
   position: relative;
-  background-color: rgb(230,225,250);
   margin-bottom: 4px;
+  background-color: rgb(220,200,235);
+  color: rgb(50,40,120);
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.repo.dark {
+  background-color: rgb(200,200,250);
+  color: rgb(40,40,140);
 }
 
 .repo .jobs {
   display: inline-block;
   vertical-align: top;
-}
-
-.repo.dark {
-  background-color: rgb(220,200,235);
 }
 
 .repo .gravatar {
@@ -95,6 +100,18 @@ body {
   background-color: rgb(255,50,50);
   text-align: center;
   min-height: 5px;
+}
+
+.results .version.ok {
+  background-color: rgb(50,255,50);
+}
+
+.results .version.fail {
+  background-color: rgb(255,50,50);
+}
+
+.results .version.pending {
+  background-color: rgb(100,100,100);
 }
 
 #browsers {
