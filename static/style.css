@@ -3,7 +3,13 @@ body {
 }
 
 #header {
-  margin-bottom: -40px;
+  width: 940px;
+  margin: auto;
+}
+
+#header #header-left {
+  display: inline-block;
+  width: 530px;
 }
 
 #header h1 {
@@ -15,7 +21,6 @@ body {
 
 #header .logo {
   margin-left: 15px;
-  margin-bottom: -20px;
   margin-top: 5px;
 }
 
@@ -38,12 +43,19 @@ body {
 #repos {
   background-color: rgb(252,245,255);
   min-height: 400px;
+  width: 940px;
+  margin: auto;
 }
 
 .repo {
   position: relative;
-  background-color: rgb(250,240,255);
+  background-color: rgb(230,225,250);
   margin-bottom: 4px;
+}
+
+.repo .jobs {
+  display: inline-block;
+  vertical-align: top;
 }
 
 .repo.dark {
@@ -58,33 +70,35 @@ body {
 
 .repo .info {
   display: inline-block;
-  width: 400px;
+  vertical-align: top;
+  width: 420px;
   vertical-align: top;
   margin-top: 10px;
   margin-left: 10px;
 }
 
-.repo .job {
-  
-}
-
 .results {
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  border: 1px solid purple;
-  width: 400px;
+  position: relative;
+  display: inline-block;
+  width: 410px;
+  text-align: right;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
 }
 
 .results .result {
   width: 40px;
-  border: 1px solid orange;
-  height: 100%;
+  margin-right: 5px;
   display: inline-block;
   vertical-align: top;
+  background-color: rgb(255,50,50);
+  text-align: center;
+  min-height: 5px;
 }
 
 #browsers {
+  display: inline-block;
   text-align: right;
   margin-right: 10px;
 }

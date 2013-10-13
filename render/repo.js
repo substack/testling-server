@@ -8,13 +8,9 @@ module.exports = function () {
     return hyperspace(html, function (row) {
         return {
             '.repo': (index++ % 2 === 0 ? { 'class': 'repo dark' } : {}),
-            '.name': {
-                href: '/' + row.repo,
-                _text: row.repo
-            },
             '.gravatar': { href: '/~' + row.repo.split('/')[0] },
             '.gravatar img': { src: '/avatar/' + row.user + '.jpg' },
-            '.jobs': row.jobs({ limit: 1 }).pipe(job())
+            '.jobs': row.jobs({ limit: 1 }).pipe(job(row.repo))
         };
     });
 };
