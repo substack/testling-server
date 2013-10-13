@@ -175,8 +175,8 @@ Server.prototype.handle = function (req, res) {
         res.setHeader('content-type', 'text/html');
         var tr = trumpet();
         tr.select('#browsers').createWriteStream().end(
-            Object.keys(browsers).map(function (name) {
-                return '<img src="/_/images/' + name + '.png">';
+            browsers.map(function (b) {
+                return '<img src="/_/images/' + b.name + '.png">';
             }).join('\n')
         );
         

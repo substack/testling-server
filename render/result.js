@@ -3,6 +3,7 @@ var fs = require('fs');
 var html = fs.readFileSync(__dirname + '/result.html', 'utf8');
 var through = require('through');
 var combine = require('stream-combiner');
+var available = require('../available.json');
 
 module.exports = function () {
     var browsers = {};
@@ -36,8 +37,8 @@ module.exports = function () {
     
     function end () {
         var tr = this;
-        Object.keys(browsers).sort().forEach(function (name) {
-            tr.queue({ key: name, value: browsers[name] });
+        available.forEach(function (b) {
+            tr.queue({ key: b.name, value: browsers[b.name] || [] });
         });
         tr.queue(null);
     }
