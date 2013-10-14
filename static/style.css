@@ -51,13 +51,13 @@ body {
 .repo {
   position: relative;
   margin-bottom: 4px;
-  background-color: rgb(220,200,235);
+  background-color: rgb(230,200,245);
   color: rgb(50,40,120);
   border-radius: 5px;
 }
 
 .repo.dark {
-  background-color: rgb(190,140,200);
+  background-color: rgb(220,180,240);
   color: rgb(40,40,140);
 }
 
@@ -101,19 +101,20 @@ body {
 }
 
 .results .version {
-  background-color: rgb(100,100,100);
+  background-color: rgb(140,100,180);
   margin-bottom: 2px;
   font-size: 0.8em;
-  color: rgb(180,180,180);
+  color: rgb(220,200,240);
 }
 
 .results .version.ok {
-  background-color: rgb(140,205,120);
-  color: rgb(25,80,25);
+  background-color: rgb(110,205,120);
+  color: rgb(240,230,255);
 }
 
 .results .version.fail {
   background-color: rgb(255,50,50);
+  color: rgb(255,230,230);
 }
 
 #browsers {
