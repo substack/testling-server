@@ -66,6 +66,14 @@ body {
   vertical-align: top;
 }
 
+.repo .jobs .job.light {
+  background-color: rgb(230,200,245);
+}
+
+.repo .jobs .job.dark {
+  background-color: rgb(220,180,240);
+}
+
 .repo .gravatar {
   display: inline-block;
   margin-left: 4px;

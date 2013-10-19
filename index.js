@@ -165,13 +165,14 @@ Server.prototype.handle = function (req, res) {
             r.jobs().pipe(tf).pipe(res);
         });
     }
-    else if (parts.length === 2) {
-        var user = parts[0];
-        var repo = parts[1];
+    else if (u === '' || parts.length === 2) {
+        var opts = {};
+        if (parts.length === 2) {
+            var key = parts.join('/');
+            opts.start = key;
+            opts.end = key + '~';
+        }
         
-        res.end('TODO: handle repo page\n');
-    }
-    else if (u === '') {
         res.setHeader('content-type', 'text/html');
         var tr = trumpet();
         tr.select('#browsers').createWriteStream().end(
@@ -180,7 +181,7 @@ Server.prototype.handle = function (req, res) {
             }).join('\n')
         );
         
-        self.assoc.list('repo')
+        self.assoc.list('repo', opts)
             .pipe(through(function (row) {
                 this.queue({
                     user: row.key.split('/')[0],
@@ -188,7 +189,7 @@ Server.prototype.handle = function (req, res) {
                     jobs: row.value.jobs
                 });
             }))
-            .pipe(render.repos())
+            .pipe(render.repos({ expand: parts.length === 2 }))
             .pipe(tr.createWriteStream('#repos'))
         ;
         
