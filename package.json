@@ -34,7 +34,8 @@
     "level-assoc": "~0.13.0",
     "level-sublevel": "~5.1.1",
     "level": "~0.17.0-1",
-    "stream-combiner": "0.0.2"
+    "stream-combiner": "0.0.2",
+    "bytewise": "~0.7.1"
   },
   "devDependencies": {
     "tap": "~0.4.0"
